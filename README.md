@@ -9,7 +9,25 @@ Review of localcovid19now
 
 ## Paper
 
- * [ ] I really miss a picture
+First and foremost, I think the authors did an excellent job in collecting all
+information about COVID prevalance! I think the package is useful and relevant.
+
+However, when only running the examples both `README.md`
+and the code examples, there are plenty of needless warnings.
+Similar to having spelling errors in an academic manuscript,
+this comes accross as needlessly sloppy.
+Also, not using a uniform coding standard is another such thing
+to make the package come accross as needlessly 
+sloppy (for example, `calc_risk`, `addNewGeoms` and `LoadAlgeria` each
+follow a different naming convention).
+Additionally, most (all?) examples are put into `dontrun` tags,
+which is fine for fuction that take a long time, but this happens
+for short functions as well. This gives the incorrect impression
+that the authors do not want to have examples that are actually 
+ran, and hence, checked (the `calc_risk` function is a good example)!
+I encourage the authors to fix these things,
+so that `localcovid19now` makes an even better impression,
+as I feel they did important work that should not be underappreciated.
 
 ### [Review checklist](https://raw.githubusercontent.com/openjournals/joss/main/docs/review_checklist.md)
 
@@ -78,9 +96,35 @@ Yes
 
 - **Functionality:** Have the functional claims of the software been confirmed?
 
+Loading the Phillipines dataset on its own, after authentication, fails:
 
+```
+> googledrive::drive_auth(email = TRUE)
+> Philippines <- LoadPhilippines()
+Error in `gargle::response_process()`:
+! Client error: (403) Forbidden
+Insufficient Permission: Request had insufficient authentication scopes.
+• domain: global
+• reason: insufficientPermissions
+• message: Insufficient Permission: Request had insufficient authentication scopes.
+Run `rlang::last_error()` to see where the error occurred.
+```
+
+However, the Phillipes can be loaded by using `r LoadCountries`:
+
+```
+> GLOBALMAP <- LoadCountries()
+
+ LoadPhilippines 
+
+ LoadAlgeria 
+
+ LoadAustralia 
+```
 
 - **Performance:** If there are any performance claims of the software, have they been confirmed? (If there are no claims, please check off this item.)
+
+NA
 
 ### Documentation
 
@@ -96,7 +140,7 @@ No and this is not needed: the installation installs all dependencies.
 
 - **Example usage:** Do the authors include examples of how to use the software (ideally to solve real-world analysis problems).
 
-When running the code in README.md, one gets as needless warning:
+When running the code in `README.md`, one gets as needless warning:
 
 ```
 > Malaysia <- LoadMalaysia()
@@ -171,6 +215,17 @@ Joining, by = "geoid"
 Joining, by = "geoid"
 ```
 
+Additionally, the `README.md` has a needlessly clumsy construct:
+
+```r
+GLOBALMAP <- LoadCountries()
+GLOBALMAP <- tidy_Data(GLOBALMAP) 
+```
+
+I see no point to bother a user to call `tidy_Data`. Instead, I'd encourage
+either that the `LoadCountries` function calls `tidy_Data` in its final setup,
+or that other functions such as `PerCapitaMap_leaflet` 
+detect if the data data needs to be tidied and do so if needed.
 
 #### Regular functions
 
@@ -208,14 +263,116 @@ Content type 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 downloaded 2.7 MB
 ```
 
+The example `moveFiles` creates and moves a file in the user's filesystem,
+without deleting it. This would go against CRAN guidelines, as it comes
+across as needlessly ignorant of the user (creating useless new files, that is).
+I encourage the authors to deleted the moved file.
+
+Note that `moveFiles` has an unclear name (`moveProcessedFiles` already seems better) 
+and does overwrite files if these are at the target location. I encourage the
+authors to give an error if there is a file at the target folder that is to
+be overwritten.
+
+Additionally, what does a function like `moveFiles` do in a file called `addNewGeom`?
+I encourage the authors to either put it into a files called `MoveFiles.R`
+or `FileUtils.R`.
+
+`addNewGeoms` has an example that is `dontrun` for some reason. Running it
+takes no time at all and it does not seem to do anything. I would enjoy
+to see an example of `addNewGeoms` that actually does something.
+
+`resetNewGeoms` does something that seems to not take time, yet it is
+in `dontrun`. I am unsure what it does, but whatever it does, it can
+just be run. I encourage the authors to remove the `dontrun`.
+
+The `calc_risk` function has an example function with needless `dontrun`
+and -probably due to that- a typo in the call to the function:
+
+```r
+#' @examples
+#' \dontrun{
+#' risk <- calcrisk(.001, 50)
+#' }
+#'
+```
+
+I suggest to remove the `dontrun` and call the function with the correct name.
+
+The example from `create_c19r_data` (except for the needless warnings)
+does not convey what it does by its return type. As it creates a CSV file,
+I would encourage the authors to either return the CSV filename or the
+content of the CSV table.
+
+The example of `estRisk` is needlessly put into `dontrun`. 
+
+The examples of `EventMap_leaflet` and `EventMap_tmap` 
+give an error that does not help
+the user to find the problem:
+
+```r
+> Austria <- LoadAustria()
+Error in open.connection(3L, "rb") : 
+error:0A00018A:SSL routines::dh key too small
+```
+
+Neither `PerCapitaMap_leaflet` nor `PerCapitaMap_tmap` 
+have an example. Please add one :-)
+
+The `remSurplus` example seems to run in less than 1 second.
+I suggest to remove the `dontrun` tag due to that.
+
+I could not check `tidy_Data` example, as the first line gave en error (see
+below). I encourage the authors to use an easier country to demonstrate
+the `tidy_Data` function.
+
+```r
+> Philippines <- LoadPhilippines()
+Auto-refreshing stale OAuth token.
+Error in `gargle::response_process()`:
+! Client error: (403) Forbidden
+Insufficient Permission: Request had insufficient authentication scopes.
+• domain: global
+• reason: insufficientPermissions
+• message: Insufficient Permission: Request had insufficient authentication scopes.
+Run `rlang::last_error()` to see where the error occurred.
+```
+
 
 - **Functionality documentation:** Is the core functionality of the software documented to a satisfactory level (e.g., API method documentation)?
 
-Running the examples creates files within the package, e.g. `tools/processed/testFile.R`
+Yes.
 
 - **Automated tests:** Are there automated tests or manual steps described so that the functionality of the software can be verified?
 
+There are automated tests that test the package to some extent.
+
+For example, the package is tested to be built.
+Note that there are many notes/warnings that are ignored
+in the error logs, e.g. the latest error log at https://github.com/sjbeckett/localcovid19now/actions/runs/3143906398/jobs/5109223012#step:5:304 (needs a GitHub login)
+has 4 notes. This comes across as needlessly ignorant and I encourage 
+the authors to fix all these.
+
+The main functionality is, however, not tested.
+
+It is understandable that the main functionality is not
+tested in the code examples in the documentation:
+these take too long (CRAN uses 5 secs as the definition of 'too long').
+
+However, I would expect another GitHub Actions script that
+
+ * Loads all countries that do not need a Google Authentication
+ * Creates a PNG file with a world map of COVID densities
+   * using both Leaflet and TMap
+
+I do not expect tests about actually using Leaflet or TMap's user interfaces,
+nor using the data behind the Google Authentication.
+
+But creating an image for easily accessible countries seems the core 
+functionality to me. Put that in a simple R script and add it to the tests.
+
 - **Community guidelines:** Are there clear guidelines for third parties wishing to 1) Contribute to the software 2) Report issues or problems with the software 3) Seek support
+
+Yes.
 
 ### Software paper
 
@@ -239,8 +396,14 @@ Yes.
 
 - **State of the field:** Do the authors describe how this software compares to other commonly-used packages?
 
+Yes.
+
 - **Quality of writing:** Is the paper well written (i.e., it does not require editing for structure, language, or writing quality)?
 
+Yes, I would agree to accept it as-is. Good job!
 
+As a minor note, I would enjoy to see pictures in the paper. 
+`localcovid19now` is about putting the spread of COVID-19 into pretty maps.
+I would strongly expect at least one such picture!
 
 - **References:** Is the list of references complete, and is everything cited appropriately that should be cited (e.g., papers, datasets, software)? Do references in the text use the proper [citation syntax]( https://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html#citation_syntax)?
