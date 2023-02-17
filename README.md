@@ -34,7 +34,7 @@ as I feel they did important work that should not be underappreciated.
 ### Conflict of interest
 
  * [x] I confirm that I have read the 
-   [JOSS conflict of interest policy](reviewer_guidelines.html#joss-conflict-of-interest-policy) 
+   [JOSS conflict of interest policy](https://joss.readthedocs.io/en/latest/reviewer_guidelines.html#joss-conflict-of-interest-policy) 
    and that: I have no COIs with reviewing this work or 
    that any perceived COIs have been waived by JOSS for the purpose of this review.
 
